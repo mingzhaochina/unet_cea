@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/zm/ConvNetQuake/unet_github/model/unet.ckpt-0"
+all_model_checkpoint_paths: "/home/zm/ConvNetQuake/unet_github/model/unet.ckpt-0"
