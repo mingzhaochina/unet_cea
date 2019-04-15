@@ -27,9 +27,12 @@ Some train snapshots
 ## Installation
 * Install dependencies: `conda env create -f unet_cea python27.yaml`
 
-## Train
+## Train(just a small data to show the code really work ^_^)
 
 python ./bin/unet_train.py --tfrecords_dir data/train/  --checkpoint_dir model
+
+## validate
+python ./bin/unet_eval.py --tfrecords_dir data/test --checkpoint_path output/unet_capital/  --batch_size 1000 --output_dir output/unet --events
 
 ## Tensorboard for real-time monitor
 
@@ -39,8 +42,8 @@ tensorboard --logdir model
 An trained model on Chinese Metropolitian Network(178 stations,266350 samples),thanks to  Hebei Earthquake Administration for providing the catalogs and high accuracy manual picks 
 The directory `unet_capital`
 
-## validate
-python ./bin/unet_eval.py --tfrecords_dir data/test --checkpoint_path output/unet_capital/  --batch_size 1000 --output_dir output/unet --events
+Use new test data(not used in the train and validate process) to check the preformance of the model:
+python ./bin/unet_eval_from_tfrecords.py --tfrecords_dir detection --checkpoint_path ./unet_capital/unet.ckpt-585000 --batch_size 8 --output_dir output
 
 
 (more to come) 
