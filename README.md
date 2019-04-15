@@ -40,9 +40,11 @@ tensorboard --logdir model
 
 ## Trained model
 An trained model on Chinese Metropolitian Network(178 stations,266350 samples),thanks to  Hebei Earthquake Administration for providing the catalogs and high accuracy manual picks 
+
 The directory `unet_capital`
 
 Use new test data(not used in the train and validate process) to check the preformance of the model:
+
 python ./bin/unet_eval_from_tfrecords.py --tfrecords_dir detection --checkpoint_path ./unet_capital/unet.ckpt-585000 --batch_size 8 --output_dir output
 
 
