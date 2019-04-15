@@ -9,16 +9,21 @@ And,it is developed from ConvNetQuake :
 Perol., T, M. Gharbi and M. Denolle. Convolutional Neural Network for Earthquake detection and location. [preprint arXiv:1702.02073](https://arxiv.org/abs/1702.02073), 2017.
 
 The u-net structure
+
 ![The u-net](./fig1.jpg)
 
 The example of labeled sample:
+
 ![labeled sample](./fig2.jpg)
 
 Some detect results
+
 ![Detections](./fig3.jpg)
 
 Some train snapshots
+
 ![snapshots](./20190414211527.png)
+
 ## Installation
 * Install dependencies: `conda env create -f unet_cea python27.yaml`
 
