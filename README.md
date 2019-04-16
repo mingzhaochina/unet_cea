@@ -26,9 +26,7 @@ Some train snapshots
 
 ## Installation
 
-* build conda env: `conda create -n unet_cea python=2.7`
- 
-* Install dependencies: `conda env create -f  python27.yaml`
+* Install dependencies: `conda env create -f  unet_cea.yaml`
 
 ## Train(just a small data to show the code really work ^_^)
 
