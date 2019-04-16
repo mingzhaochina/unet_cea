@@ -48,6 +48,9 @@ Use new test data(not used in the train and validate process) to check the prefo
 python ./bin/unet_eval_from_tfrecords.py --tfrecords_dir detection --checkpoint_path ./unet_capital/unet.ckpt-585000 --batch_size 8 --output_dir output
 
 or you can test with your own data (mseed)
+
 可以直接用以下程序，载入你自己的mseed格式波形，进行实时检测
+
 python ./bin/unet_eval_from_stream.py --stream_path ./mseed/  --checkpoint_path unet_capital/unet.ckpt-590000 --batch_size 8 --output_dir output/predict_from_stream --plot
+
 (more to come) 
