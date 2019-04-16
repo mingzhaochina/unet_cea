@@ -287,7 +287,16 @@ def accuracy(logits, labels):
     #precision, recall, f1 = score(predicted_annots, predicted_labels)
     #precision = score(predicted_annots, predicted_labels)
     return precision
-
+def recall(logits, labels):
+        labels = tf.to_int64(labels)
+        labels = tf.reshape(labels, [-1, 3])
+                        # tf.argmax: Returns the index with the largest value across axes of a tensor
+        predicted_annots = tf.reshape(tf.argmax(logits, axis=1), [-1, 1])
+        predicted_labels = tf.reshape(tf.argmax(labels, axis=1), [-1, 1])
+        recall=tf.metrics.mean_per_class_accuracy(predicted_labels,predicted_annots,3)
+                                        #precision, recall, f1 = score(predicted_annots, predicted_labels)
+                                            #precision = score(predicted_annots, predicted_labels)
+        return recall
 def train(loss, learning_rate, learning_rate_decay_steps, learning_rate_decay_rate, global_step):
     """
     Train opetation:
