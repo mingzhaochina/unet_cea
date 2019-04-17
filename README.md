@@ -25,8 +25,27 @@ Some train snapshots
 ![snapshots](./20190414211527.png)
 
 ## Installation
+* `export PYTHONPATH=`pwd`:$PYTHONPATH`
 
 * Install dependencies: `conda env create -f  unet_cea.yaml`
+
+## create dataset
+
+First you need a phase file for doing such thing:
+
+./bin/create_dataset_events_unet.py --stream_dir waveform --catalog ps_picks_capital.csv --output_dir train_30s_unet --plot True --window_size 30
+
+the ps_picks_capital.csv has a format like this:
+
+,ev_dir,ev_id,ev_start,p_pick,s_pick,stname,time_diff,utc_timestamp,utc_timestamp_s
+
+0,HE.200901010316.0001,1,2009-01-01T03:16:45.759000Z,2009-01-01T03:16:49.219000Z,2009-01-01T03:16:50.599000Z,CC.XBZ,1.3799998760223389,1230751009.219,1230751010.599
+
+1,HE.200901010316.0001,1,2009-01-01T03:16:45.759000Z,2009-01-01T03:16:51.779000Z,2009-01-01T03:16:56.459000Z,BU.LQS,4.680000066757202,1230751011.779,1230751016.459
+
+2,HE.200901010316.0001,1,2009-01-01T03:16:45.759000Z,2009-01-01T03:16:52.129000Z,2009-01-01T03:16:55.599000Z,BJ.SSL,3.4700000286102295,1230751012.129,1230751015.599
+
+....................................................................................................................................................................
 
 ## Train(just a small data to show the code really work ^_^)
 
