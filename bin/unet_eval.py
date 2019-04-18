@@ -137,7 +137,6 @@ def evaluate():
                     accuracy_n_value=acc_seg_value[1][0]
                     #pred_labels = np.append(pred_labels, predicted_images_value)
                     #true_labels = np.append(true_labels, images_value)
-                    global_accuracy += acc_seg_value
                     global_p_accuracy += accuracy_p_value
                     global_s_accuracy += accuracy_s_value
                     global_n_accuracy += accuracy_n_value
@@ -154,7 +153,8 @@ def evaluate():
                     #s='loss = {:.5f} | det. acc. = {:.1f}% | loc. acc. = {:.1f}%'.format(metrics['loss']
                     print('[PROGRESS]\tAccuracy for current batch: |  P. acc. =%.5f| S. acc. =%.5f| '
                           'noise. acc. =%.5f.' % (accuracy_p_value,accuracy_s_value,accuracy_n_value))
-                    n += cfg.batch_size
+                    #n += cfg.batch_size
+                    n += 1
                   #  step += 1
                     print (n)
             except KeyboardInterrupt:

@@ -163,7 +163,7 @@ def main(_):
         #cat = evlog[(evlog.stname == stream_dir)]
         #print cat
         # Load stream
-        stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"event")
+        stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"local")
         waveforms=read(os.path.join(stream_path, '*.SAC'))
         waveforms.sort
         #print waveforms[0]
@@ -257,10 +257,6 @@ def main(_):
                                                                  st_event[0].stats.station,
                                                                  str(st_event[0].stats.starttime).replace(
                                                                      ':', '_'))))
-
-            else:
-                print "Missing waveform for event:", UTCDateTime(event_time)
-
         # Cleanup writer
         print("Number of events written={}".format(writer._written))
         writer.close()
