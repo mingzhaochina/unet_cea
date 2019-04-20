@@ -1,0 +1,6 @@
+model_checkpoint_path: "unet.ckpt-1455000"
+all_model_checkpoint_paths: "unet.ckpt-1435000"
+all_model_checkpoint_paths: "unet.ckpt-1440000"
+all_model_checkpoint_paths: "unet.ckpt-1445000"
+all_model_checkpoint_paths: "unet.ckpt-1450000"
+all_model_checkpoint_paths: "unet.ckpt-1455000"
