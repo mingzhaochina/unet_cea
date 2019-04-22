@@ -15,7 +15,7 @@ e.g.,
 --output_dir data/50_clusters/tfrecords
 """
 
-import os
+import os,glob,re
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -163,16 +163,22 @@ def main(_):
         #cat = evlog[(evlog.stname == stream_dir)]
         #print cat
         # Load stream
-        stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"local")
-        waveforms=read(os.path.join(stream_path, '*.SAC'))
-        waveforms.sort
+        stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"event")
+        stream_files = glob.glob(stream_path + '/*HZ.D.SAC')
         #print waveforms[0]
         output_name = stream_dir + ".tfrecords"
         output_path = os.path.join(FLAGS.output_dir, output_name)
         writer = DataWriter(output_path)
-        print("+ Creating tfrecords for {} events".format(len(waveforms)))
-        for i in range(0, len(waveforms), 3):
-            print "+ Loading Stream\n {}\n{}\n{}".format(waveforms[i],waveforms[i+1],waveforms[i+2])
+        print("+ Creating tfrecords for {} events".format(len(stream_files)))
+        for stream_file in stream_files:
+            stream_file1 = re.sub('HZ.D.SAC', 'HE.D.SAC', str(stream_file))
+            stream_file2 = re.sub('HZ.D.SAC', 'HN.D.SAC', str(stream_file))
+            # Load stream
+            #print "+ Loading Stream {}".format(stream_path)
+            stream = read(stream_file)
+            stream += read(stream_file1)
+            stream += read(stream_file2)
+
             #stream_filepath = os.path.join(stream_path, stream_file)
             #stream = read(stream_filepath)
             #print '+ Preprocessing stream',stream
@@ -180,11 +186,16 @@ def main(_):
 
         # Filter catalog according to the loaded stream
 
-            start_date = waveforms[i].stats.starttime
-            end_date = waveforms[i+2].stats.endtime
+            start_date = stream[0].stats.starttime
+            end_date = stream[-1].stats.endtime
             print("-- Start Date={}, End Date={}".format(start_date, end_date))
             x = np.random.randint(0, 4)
-            st_event = waveforms[i:i+3].resample(100).trim(start_date+x, start_date+x+FLAGS.window_size,pad=True, fill_value=0.0).copy()
+
+            print "+ Loading Stream selected\n {}\n ".format(stream)
+
+            if len(stream)<3:
+                continue
+            st_event = stream.resample(100).trim(start_date+x, start_date+x+FLAGS.window_size,pad=True, fill_value=0.0).copy()
             #st_event.resample(100)
             print (st_event)
             n_samples = len(st_event[0].data)
@@ -206,8 +217,8 @@ def main(_):
             label_obj[1].data[...] = 0
             label_obj[2].data[...] = 0
             u1 = cluster_id_p * sample_rate  # mean value miu
-            lower = int(u1 - 0.5 * sample_rate)
-            upper = int(u1 + 0.5 * sample_rate)
+            lower = int(u1 - sample_rate)
+            upper = int(u1 + sample_rate)
             label_obj[1].data[lower:upper] = 1
             # label_obj.data[int(u1 - 0.5 * sample_rate):int(u1 + 0.5 * sample_rate)] = 1
             # y_sig = np.random.normal(u1, sig, n_samples )
@@ -257,6 +268,7 @@ def main(_):
                                                                  st_event[0].stats.station,
                                                                  str(st_event[0].stats.starttime).replace(
                                                                      ':', '_'))))
+
         # Cleanup writer
         print("Number of events written={}".format(writer._written))
         writer.close()
