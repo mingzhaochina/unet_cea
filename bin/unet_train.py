@@ -72,7 +72,7 @@ def train():
     print "accuarcy,recall,f1", accuarcy
     #load class weights if available
     if FLAGS.class_weights :
-        weights = [1,60,60]
+        weights = [1.0,50.0,50.0]
         class_weight_tensor = tf.constant(weights, dtype=tf.float32, shape=[FLAGS.num_classes, 1])
     else:
         class_weight_tensor = None
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--tfrecords_prefix', help = 'Tfrecords prefix', default = 'tfrecords')
     parser.add_argument('--checkpoint_dir', help = 'Checkpoints directory')
     parser.add_argument('--num_classes', help = 'Number of segmentation labels', type = int, default = 3)
-    parser.add_argument('--class_weights', help = 'Weight per class for weighted loss.  [num_classes]',type=bool,default=False)
+    parser.add_argument('--class_weights', help = 'Weight per class for weighted loss.  [num_classes]',type=bool,default=True)
     parser.add_argument('--learning_rate', help = 'Learning rate', type = float, default = 1e-4)
     parser.add_argument('--learning_rate_decay_steps', help = 'Learning rate decay steps', type = int, default = 10000)
     parser.add_argument('--learning_rate_decay_rate', help = 'Learning rate decay rate', type = float, default = 0.9)

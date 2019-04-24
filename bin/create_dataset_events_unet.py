@@ -144,6 +144,7 @@ def normfun(x, mu, sigma):
 def main(_):
     stream_dirs = [file for file in os.listdir(FLAGS.stream_dir)]
 
+
     print "List of streams to anlayze", stream_dirs
 
     # Create dir to store tfrecords
@@ -159,122 +160,126 @@ def main(_):
     #evlog = load_catalog(FLAGS.catalog)
     #print ("+ Loading Catalog:",evlog)
     for stream_dir in stream_dirs:
+        output_stream = os.path.join(FLAGS.output_dir, "viz",stream_dir)
+        #print output_stream
+        if not os.path.exists(output_stream):
 
-        #cat = evlog[(evlog.stname == stream_dir)]
-        #print cat
-        # Load stream
-        stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"event")
-        stream_files = glob.glob(stream_path + '/*HZ.D.SAC')
-        #print waveforms[0]
-        output_name = stream_dir + ".tfrecords"
-        output_path = os.path.join(FLAGS.output_dir, output_name)
-        writer = DataWriter(output_path)
-        print("+ Creating tfrecords for {} events".format(len(stream_files)))
-        for stream_file in stream_files:
-            stream_file1 = re.sub('HZ.D.SAC', 'HE.D.SAC', str(stream_file))
-            stream_file2 = re.sub('HZ.D.SAC', 'HN.D.SAC', str(stream_file))
+            #cat = evlog[(evlog.stname == stream_dir)]
+            #print cat
             # Load stream
-            #print "+ Loading Stream {}".format(stream_path)
-            stream = read(stream_file)
-            stream += read(stream_file1)
-            stream += read(stream_file2)
+            stream_path = os.path.join(FLAGS.stream_dir, stream_dir,"event")
 
-            #stream_filepath = os.path.join(stream_path, stream_file)
-            #stream = read(stream_filepath)
-            #print '+ Preprocessing stream',stream
-        #stream = preprocess_stream(stream)
+            stream_files = glob.glob(stream_path + '/*HZ.D.SAC')
+            #print waveforms[0]
+            output_name = stream_dir + ".tfrecords"
+            output_path = os.path.join(FLAGS.output_dir, output_name)
+            writer = DataWriter(output_path)
+            print("+ Creating tfrecords for {} events".format(len(stream_files)))
+            for stream_file in stream_files:
+                stream_file1 = re.sub('HZ.D.SAC', 'HE.D.SAC', str(stream_file))
+                stream_file2 = re.sub('HZ.D.SAC', 'HN.D.SAC', str(stream_file))
+                # Load stream
+                #print "+ Loading Stream {}".format(stream_path)
+                stream = read(stream_file)
+                stream += read(stream_file1)
+                stream += read(stream_file2)
 
-        # Filter catalog according to the loaded stream
+                #stream_filepath = os.path.join(stream_path, stream_file)
+                #stream = read(stream_filepath)
+                #print '+ Preprocessing stream',stream
+            #stream = preprocess_stream(stream)
 
-            start_date = stream[0].stats.starttime
-            end_date = stream[-1].stats.endtime
-            print("-- Start Date={}, End Date={}".format(start_date, end_date))
-            x = np.random.randint(0, 4)
+            # Filter catalog according to the loaded stream
 
-            print "+ Loading Stream selected\n {}\n ".format(stream)
+                start_date = stream[0].stats.starttime
+                end_date = stream[-1].stats.endtime
+                print("-- Start Date={}, End Date={}".format(start_date, end_date))
+                x = np.random.randint(0, 4)
 
-            if len(stream)<3:
-                continue
-            st_event = stream.resample(100).trim(start_date+x, start_date+x+FLAGS.window_size,pad=True, fill_value=0.0).copy()
-            #st_event.resample(100)
-            print (st_event)
-            n_samples = len(st_event[0].data)
-            sample_rate = st_event[0].stats.sampling_rate
-            n_pts = sample_rate * FLAGS.window_size + 1
-            cluster_id_p = 5-x
-            cluster_id_s = end_date - start_date-x-15
-            if cluster_id_s>=30:
-                continue
-            assert n_pts == n_samples, "n_pts and n_samples are not the same"
-        # Write event waveforms and cluster_id in .tfrecords
+                print "+ Loading Stream selected\n {}\n ".format(stream)
 
-            # for p picks
-            # u=0
-            # label = np.zeros((n_samples), dtype=np.float32)
-            label_obj = st_event.copy()
+                if len(stream)<3:
+                    continue
+                st_event = stream.resample(100).trim(start_date+x, start_date+x+FLAGS.window_size,pad=True, fill_value=0.0).copy()
+                #st_event.resample(100)
+                print (st_event)
+                n_samples = len(st_event[0].data)
+                sample_rate = st_event[0].stats.sampling_rate
+                n_pts = sample_rate * FLAGS.window_size + 1
+                cluster_id_p = 5-x
+                cluster_id_s = end_date - start_date-x-15
+                if cluster_id_s>=30:
+                    continue
+                assert n_pts == n_samples, "n_pts and n_samples are not the same"
+            # Write event waveforms and cluster_id in .tfrecords
 
-            label_obj[0].data[...] = 1
-            label_obj[1].data[...] = 0
-            label_obj[2].data[...] = 0
-            u1 = cluster_id_p * sample_rate  # mean value miu
-            lower = int(u1 - sample_rate)
-            upper = int(u1 + sample_rate)
-            label_obj[1].data[lower:upper] = 1
-            # label_obj.data[int(u1 - 0.5 * sample_rate):int(u1 + 0.5 * sample_rate)] = 1
-            # y_sig = np.random.normal(u1, sig, n_samples )
-            # for s pick
-            u2 = cluster_id_s * sample_rate  # mean value miu
+                # for p picks
+                # u=0
+                # label = np.zeros((n_samples), dtype=np.float32)
+                label_obj = st_event.copy()
 
-            lower2, upper2 = int(u2 - sample_rate), int(u2 + sample_rate)
-            try:
-                label_obj[2].data[lower2:upper2] = 2
-                # label_obj.data[int(u2 - sample_rate):int(u2 + sample_rate)] =2
-            except:
-                nnn = int(n_samples) - int(u2 + sample_rate)
-                print  (nnn, n_samples)
-                label_obj[2].data[lower2:n_samples] = 2
-            label_obj.normalize()
-            label_obj[0].data = label_obj[0].data - label_obj[1].data - label_obj[2].data
-            # label_obj.data[int(u2 - sample_rate):n_samples] = 2
-            writer.write(st_event.copy().normalize(), label_obj)
-            if FLAGS.save_mseed:
-                output_label = "{}_{}.mseed".format(st_event[0].stats.station,
-                                                    str(st_event[0].stats.starttime).replace(':', '_'))
+                label_obj[0].data[...] = 1
+                label_obj[1].data[...] = 0
+                label_obj[2].data[...] = 0
+                u1 = cluster_id_p * sample_rate  # mean value miu
+                lower = int(u1 - sample_rate)
+                upper = int(u1 + sample_rate)
+                label_obj[1].data[lower:upper] = 1
+                # label_obj.data[int(u1 - 0.5 * sample_rate):int(u1 + 0.5 * sample_rate)] = 1
+                # y_sig = np.random.normal(u1, sig, n_samples )
+                # for s pick
+                u2 = cluster_id_s * sample_rate  # mean value miu
 
-                output_mseed_dir = os.path.join(FLAGS.output_dir, "mseed")
-                if not os.path.exists(output_mseed_dir):
-                    os.makedirs(output_mseed_dir)
-                output_mseed = os.path.join(output_mseed_dir, output_label)
-                st_event.write(output_mseed, format="MSEED")
+                lower2, upper2 = int(u2 - sample_rate), int(u2 + sample_rate)
+                try:
+                    label_obj[2].data[lower2:upper2] = 2
+                    # label_obj.data[int(u2 - sample_rate):int(u2 + sample_rate)] =2
+                except:
+                    nnn = int(n_samples) - int(u2 + sample_rate)
+                    print  (nnn, n_samples)
+                    label_obj[2].data[lower2:n_samples] = 2
+                label_obj.normalize()
+                label_obj[0].data = label_obj[0].data - label_obj[1].data - label_obj[2].data
+                # label_obj.data[int(u2 - sample_rate):n_samples] = 2
+                writer.write(st_event.copy().normalize(), label_obj)
+                if FLAGS.save_mseed:
+                    output_label = "{}_{}.mseed".format(st_event[0].stats.station,
+                                                        str(st_event[0].stats.starttime).replace(':', '_'))
 
-            # Plot events
-            if FLAGS.plot:
-                #import matplotlib
-                #matplotlib.use('Agg')
+                    output_mseed_dir = os.path.join(FLAGS.output_dir, "mseed")
+                    if not os.path.exists(output_mseed_dir):
+                        os.makedirs(output_mseed_dir)
+                    output_mseed = os.path.join(output_mseed_dir, output_label)
+                    st_event.write(output_mseed, format="MSEED")
 
-                # from obspy.core import Stream
-                traces = Stream()
-                traces += st_event[0].filter('bandpass', freqmin=0.5, freqmax=20)
-                traces += label_obj
-                # print traces
-                viz_dir = os.path.join(
-                    FLAGS.output_dir, "viz",stream_dir)
-                if not os.path.exists(viz_dir):
-                    os.makedirs(viz_dir)
-                traces.normalize().plot(outfile=os.path.join(viz_dir,
-                                                             ####changed at 2017/11/25,use max cluster_prob instead of cluster_id
-                                                             #                "event_{}_cluster_{}.png".format(idx,cluster_id)))
-                                                             "event_{}_{}.png".format(
-                                                                 st_event[0].stats.station,
-                                                                 str(st_event[0].stats.starttime).replace(
-                                                                     ':', '_'))))
+                # Plot events
+                if FLAGS.plot:
+                    #import matplotlib
+                    #matplotlib.use('Agg')
 
-        # Cleanup writer
-        print("Number of events written={}".format(writer._written))
-        writer.close()
-        # Write metadata
-        metadata[stream_dir] = writer._written
-        write_json(metadata, output_metadata)
+                    # from obspy.core import Stream
+                    traces = Stream()
+                    traces += st_event[0].filter('bandpass', freqmin=0.5, freqmax=20)
+                    traces += label_obj
+                    # print traces
+                    viz_dir = os.path.join(
+                        FLAGS.output_dir, "viz",stream_dir)
+                    if not os.path.exists(viz_dir):
+                        os.makedirs(viz_dir)
+                    traces.normalize().plot(outfile=os.path.join(viz_dir,
+                                                                 ####changed at 2017/11/25,use max cluster_prob instead of cluster_id
+                                                                 #                "event_{}_cluster_{}.png".format(idx,cluster_id)))
+                                                                 "event_{}_{}.png".format(
+                                                                     st_event[0].stats.station,
+                                                                     str(st_event[0].stats.starttime).replace(
+                                                                         ':', '_'))))
+
+            # Cleanup writer
+            print("Number of events written={}".format(writer._written))
+            writer.close()
+            # Write metadata
+            metadata[stream_dir] = writer._written
+            write_json(metadata, output_metadata)
 
 
 if __name__ == "__main__":

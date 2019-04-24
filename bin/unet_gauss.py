@@ -211,13 +211,26 @@ def segmentation_loss(logits, labels, class_weights = None):
         segment_loss: Segmentation loss
     """
     #import numpy as np
+    print "33333333logits,labels", logits.shape, labels.shape
+    labels = tf.to_int64(labels)
     label = tf.reshape(labels, [-1,3])
-    labels=tf.argmax(label, 1)
+    #print "label_reshape",label
+    #label = tf.expand_dims(label, -1)
+    #print "label_expand",label
+    #label_tile = tf.tile(label, (1, 3))
+    #print "label_tile",label_tile
+    #label_tile[:, 0] = tf.where(label_tile[:, 0] == 0,1,0)
+    #label_tile[:, 1] = tf.where(label_tile[:, 1] == 1,1,0)
+    #label_tile[:, 2] = tf.where(label_tile[:, 2] == 2,1,0)
+    #label=tf.stack([x, y, z], axis=2)
+   # label = label_tile
+    label=tf.argmax(label, 1)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-                             labels = labels, logits = logits, name = 'segment_cross_entropy_per_example')
+                             labels = label, logits = logits, name = 'segment_cross_entropy_per_example')
 
     #cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(
     #                    labels = label, logits = logits, name = 'segment_cross_entropy_per_example')
+    print "cross_entropy",cross_entropy
     if class_weights is not None:
         weights = tf.matmul(label, class_weights, a_is_sparse = True)
         weights = tf.reshape(weights, [-1])
@@ -257,7 +270,7 @@ def loss(logits, labels, weight_decay_factor, class_weights = None):
         total_loss: Segmentation + Classification losses + WeightDecayFactor * L2 loss
     """
 
-    segment_loss = segmentation_loss(logits, labels,class_weights)
+    segment_loss = segmentation_loss(logits, labels)
     total_loss   = segment_loss + weight_decay_factor * l2_loss()
     tf.summary.scalar("loss/total", total_loss)
     return total_loss
@@ -269,6 +282,8 @@ def accuracy(logits, labels):
     predicted_annots = tf.reshape(tf.argmax(logits, axis=1), [-1, 1])
     predicted_labels = tf.reshape(tf.argmax(labels, axis=1), [-1, 1])
     precision=tf.metrics.mean_per_class_accuracy(predicted_labels,predicted_annots,3)
+    #precision, recall, f1 = score(predicted_annots, predicted_labels)
+    #precision = score(predicted_annots, predicted_labels)
     return precision
 
 def recall(logits, labels):
@@ -277,7 +292,7 @@ def recall(logits, labels):
                         # tf.argmax: Returns the index with the largest value across axes of a tensor
         predicted_annots = tf.reshape(tf.argmax(logits, axis=1), [-1, 1])
         predicted_labels = tf.reshape(tf.argmax(labels, axis=1), [-1, 1])
-        recall=tf.metrics.recall(predicted_labels,predicted_annots,3)
+        recall=tf.metrics.mean_per_class_accuracy(predicted_labels,predicted_annots,3)
                                         #precision, recall, f1 = score(predicted_annots, predicted_labels)
                                             #precision = score(predicted_annots, predicted_labels)
         return recall
