@@ -45,14 +45,6 @@ def train():
     Train unet using specified args:
     """
 
-    data_files, data_size = load_datafiles(FLAGS.tfrecords_prefix)
-    print data_files,data_size
-  #  images, labels, filenames = dataset_loader.inputs(
-   #                                 data_files = data_files,
-   #                                 image_size = FLAGS.image_size,
-   #                             batch_size = FLAGS.batch_size,
-   #                                 num_epochs = FLAGS.num_epochs,
-   #                                 train = True)
     setproctitle.setproctitle('quakenet')
 
     tf.set_random_seed(1234)
@@ -65,20 +57,27 @@ def train():
     cfg.n_clusters += 1
 
     # data pipeline for positive and negative examples
+
+    data_files, data_size = load_datafiles(FLAGS.tfrecords_prefix)
+    print data_files,data_size
     pos_pipeline = dp.DataPipeline(FLAGS.tfrecords_dir, cfg, True)
 #  images:[batch_size, n_channels, n_points]
     images= pos_pipeline.samples
     labels = pos_pipeline.labels
+    print "1111111labels,images",labels,images
     logits = unet.build_30s(images, FLAGS.num_classes, True)
+    print "logits111",logits,labels
     accuarcy = unet.accuracy(logits, labels)
+    #print "accuarcy,recall,f1", accuarcy,recall,f1
     print "accuarcy,recall,f1", accuarcy
     #load class weights if available
-    if FLAGS.class_weights is not None:
-        weights = np.load(FLAGS.class_weights)
+    if FLAGS.class_weights :
+        weights = [1,60,60]
         class_weight_tensor = tf.constant(weights, dtype=tf.float32, shape=[FLAGS.num_classes, 1])
     else:
         class_weight_tensor = None
-    loss = unet.loss(logits, labels, FLAGS.weight_decay_rate)
+    loss = unet.loss(logits, labels, FLAGS.weight_decay_rate,class_weight_tensor)
+    print "loss",loss
     global_step = tf.Variable(0, name = 'global_step', trainable = False)
     train_op = unet.train(loss, FLAGS.learning_rate, FLAGS.learning_rate_decay_steps, FLAGS.learning_rate_decay_rate, global_step)
     #print "train_op",train_op
@@ -161,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--tfrecords_prefix', help = 'Tfrecords prefix', default = 'tfrecords')
     parser.add_argument('--checkpoint_dir', help = 'Checkpoints directory')
     parser.add_argument('--num_classes', help = 'Number of segmentation labels', type = int, default = 3)
-    parser.add_argument('--class_weights', help = 'Weight per class for weighted loss. .npy file that contains single array [num_classes]')
+    parser.add_argument('--class_weights', help = 'Weight per class for weighted loss.  [num_classes]',type=bool,default=False)
     parser.add_argument('--learning_rate', help = 'Learning rate', type = float, default = 1e-4)
     parser.add_argument('--learning_rate_decay_steps', help = 'Learning rate decay steps', type = int, default = 10000)
     parser.add_argument('--learning_rate_decay_rate', help = 'Learning rate decay rate', type = float, default = 0.9)
