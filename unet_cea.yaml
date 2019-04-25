@@ -1,4 +1,4 @@
-name: python27
+name: unet_cea
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
   - conda-forge
