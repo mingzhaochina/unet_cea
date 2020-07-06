@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # -------------------------------------------------------------------
-# File Name : create_dataset_events.py
-# Creation Date : 05-12-2016
-# Last Modified : Fri Jan  6 15:04:54 2017
-# Author: Thibaut Perol <tperol@g.harvard.edu>
+# File Name : create_dataset_events_unet.py
+# Description: This program is modified from create_dataset_events.py (https://github.com/ConvNetＱuake)
+# Creation Date : 05-12-2018
+# Last Modified : Mon July  6 15:04:54 2020
+# Author: Ming Zhao <mzhao@cea-igp.ac.cn>
 # -------------------------------------------------------------------
-"""Creates tfrecords dataset of events trace and their cluster_ids.
+"""Creates tfrecords dataset of events trace and their P,S labels.
 This is done by loading a dir of .mseed and one catalog with the
-time stamps of the events and their cluster_id
+time stamps of the events and their P,S labels
 e.g.,
-./bin/preprocess/create_dataset_events.py \
+./bin/preprocess/create_dataset_events_unet.py \
 --stream_dir data/streams \
---catalog data/50_clusters/catalog_with_cluster_ids.csv\
---output_dir data/50_clusters/tfrecords
+--catalog catalog.csv\
+--output_dir data/tfrecords
 """
 
 import os,glob,re
