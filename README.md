@@ -1,7 +1,9 @@
 # unet_cea
 Using Unet to train model based on wenchuan aftershocks and automatically detect p,s phases
 ============= 
+
 https://doi.org/10.5281/zenodo.4243864
+
 This is the unet code used in the paper:
 赵明，陈石，房立华，David A Yuen. 2019. 基于U形全卷积神经网络的震相识别与到时拾取方法研究. 地球物理学报，待刊.
 
